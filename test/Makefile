@@ -22,6 +22,7 @@ SIM = ghdl
 VHDL_SOURCES = $(addprefix $(SRC_DIR)/,$(SOURCE_FILES))
 SIM_BUILD = sim_build
 SIM_ARGS += --vcd=$(SIM_BUILD)/tb.vcd
+SIM_ARGS += --wave=wave.ghw
 EXTRA_ARGS += --workdir=$(SIM_BUILD) --work=work
 
 else

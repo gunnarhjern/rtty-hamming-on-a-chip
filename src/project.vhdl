@@ -90,30 +90,47 @@ architecture Behavioral of tt_um_example is
 
     signal dbus4a, dbus4b : std_logic_vector(3 downto 0);
     signal dbus8a, dbus8b : std_logic_vector(7 downto 0);          -- for hamming 7/4 +1 encoded data
+    signal ser1 : std_logic;
     signal st1, st2, st3, st4 : std_logic;
+    signal hejsan : std_logic;
     signal hamerr : std_logic;
 
 begin
 
-  --uo_out <= std_logic_vector(unsigned(ui_in) + unsigned(uio_in));
-
+    -- the first smoke-test:
+      --uo_out <= std_logic_vector(unsigned(ui_in) + unsigned(uio_in));
     uo_out <= std_logic_vector(resize(unsigned(dbus4b),4) + unsigned(uio_in));
-    uio_out <= "00000000";
-    uio_oe <= "00000000";
+            uio_out <= "00000000";
+            uio_oe <= "00000000";
+
 
     dbus4a <= ui_in(3 downto 0);
 
 
 
-
     HENC : hamenc port map (    d => dbus4a, 
-                            st_in => st1,  
+                            st_in => st1,
                                 u => dbus8a,
-                            st_out => st2,
-                            clk => clk,
-                            rst_n => rst_n 
+                             st_out => st2,
+                                clk => clk,
+                              rst_n => rst_n
                             );
-    HDEC : hamdec port map (    d => dbus8a, 
+
+    hejsan <= ui_in(0);-- or ui_in(1) or ui_in(2);  -- mock a start pulse for the serial uart
+
+    U_SER : uartser port map ( d => dbus8a, 
+                                st => hejsan,
+                                u => ser1,
+                                rdy => st3,
+                                clk => clk,
+                              rst_n => rst_n
+                            );
+
+    --dbus8b <= dbus8a(7 downto 3) & not dbus8a(2) & dbus8a(1 downto 0);
+    dbus8b <= dbus8a xor "00100000";
+
+    HDEC : hamdec port map (
+                                d => dbus8b, 
                             st_in => st2,  
                                 u => dbus4b,
                             st_out => st3,
@@ -121,5 +138,6 @@ begin
                               clk => clk,
                             rst_n => rst_n 
                             );
+
 
 end Behavioral; 
